@@ -1,0 +1,182 @@
+/* =============================================================================
+   App Shell layout — RTL-native. The grid places the sidebar in the first
+   column which, under dir="rtl", renders on the RIGHT.
+   ============================================================================= */
+
+.shell {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) 1fr;
+  grid-template-rows: var(--topbar-height) 1fr;
+  grid-template-areas:
+    'sidebar topbar'
+    'sidebar content';
+  min-height: 100dvh;
+}
+
+/* ---- Top bar ------------------------------------------------------------- */
+.topbar {
+  grid-area: topbar;
+  position: sticky;
+  top: 0;
+  z-index: var(--z-topbar);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding-inline: var(--space-5);
+  background-color: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.topbar__spacer { flex: 1; }
+.topbar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* ---- Sidebar ------------------------------------------------------------- */
+.sidebar {
+  grid-area: sidebar;
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-3);
+  background-color: var(--surface);
+  /* border on the inline-start edge = LEFT in RTL (between sidebar & content) */
+  border-inline-start: 1px solid var(--border);
+}
+
+.sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3) var(--space-4);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-h3);
+  color: var(--text-primary);
+}
+.sidebar__brand-mark {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  background: var(--accent-600);
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.nav-group { margin-bottom: var(--space-3); }
+.nav-group__label {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.02em;
+  color: var(--slate-400);
+  text-transform: none;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-weight: var(--fw-medium);
+  position: relative;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+.nav-item:hover {
+  background-color: var(--slate-100);
+  color: var(--text-primary);
+  text-decoration: none;
+}
+.nav-item.is-active {
+  background-color: var(--accent-50);
+  color: var(--accent-700);
+  font-weight: var(--fw-semibold);
+}
+/* Active accent bar on the inline-start edge (the RIGHT edge in RTL). */
+.nav-item.is-active::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 0;
+  top: 20%;
+  bottom: 20%;
+  width: 3px;
+  border-radius: var(--radius-full);
+  background-color: var(--accent-600);
+}
+.nav-item__icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.sidebar__footer { margin-top: auto; }
+
+/* ---- Content ------------------------------------------------------------- */
+.content {
+  grid-area: content;
+  padding: var(--space-6);
+}
+.content__inner {
+  max-width: var(--content-max-width);
+  margin-inline: auto;
+}
+
+/* ---- Server clock widget ------------------------------------------------- */
+.clock {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-full);
+  background-color: var(--slate-100);
+  color: var(--text-secondary);
+  font-size: var(--fs-caption);
+}
+.clock__time {
+  font-weight: var(--fw-semibold);
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- User menu ----------------------------------------------------------- */
+.usermenu {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+.usermenu__avatar {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-full);
+  background: var(--accent-100);
+  color: var(--accent-700);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-caption);
+}
+.usermenu__meta { display: flex; flex-direction: column; line-height: 1.25; }
+.usermenu__name { font-size: var(--fs-caption); font-weight: var(--fw-semibold); }
+.usermenu__role { font-size: 0.6875rem; color: var(--text-secondary); }
+
+/* ---- Responsive: collapse to an icon rail on narrower desktops ----------- */
+@media (max-width: 1100px) {
+  .shell { grid-template-columns: var(--sidebar-width-collapsed) 1fr; }
+  .nav-item__label,
+  .nav-group__label,
+  .sidebar__brand span,
+  .usermenu__meta { display: none; }
+  .nav-item { justify-content: center; }
+}

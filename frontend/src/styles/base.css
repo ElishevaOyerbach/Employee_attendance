@@ -1,0 +1,110 @@
+/* =============================================================================
+   Base — light reset + RTL-native element defaults.
+   Uses logical properties (margin-inline / padding-inline / inset-inline) so
+   the whole layout mirrors correctly under dir="rtl".
+   ============================================================================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+html {
+  /* RTL is set on <html dir="rtl"> in index.html; reaffirm here for safety. */
+  direction: rtl;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-normal);
+  color: var(--text-primary);
+  background-color: var(--bg-app);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4 {
+  line-height: var(--lh-tight);
+  font-weight: var(--fw-semibold);
+  color: var(--text-primary);
+}
+
+h1 { font-size: var(--fs-h1); }
+h2 { font-size: var(--fs-h2); }
+h3 { font-size: var(--fs-h3); }
+
+a {
+  color: var(--accent-600);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+input,
+select,
+textarea,
+button {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent-600);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Numbers and time read LTR even inside Hebrew text — keep "08:31" intact. */
+.num,
+time,
+.ltr {
+  unicode-bidi: isolate;
+  direction: ltr;
+}
+
+/* Utility: visually hidden but accessible to screen readers. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
