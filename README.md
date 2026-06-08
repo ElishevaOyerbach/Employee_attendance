@@ -1,59 +1,59 @@
 # Employee Attendance System
 
-מערכת לניהול נוכחות עובדים: רישום כניסה/יציאה והפסקות, בקשות תיקון, אישורי מנהל ודוחות חודשיים. בנויה כ‑Clean Architecture עם ‎ASP.NET Core API‎ ו‑React frontend.
+An employee attendance management system: clock‑in/out and break tracking, correction requests, manager approvals, and monthly reports. Built as a Clean Architecture solution with an ASP.NET Core API and a React frontend.
 
-## תכונות עיקריות
+## Key Features
 
-- **רישום נוכחות** – Clock‑in / Clock‑out והפסקות (Break start/end) עבור כל עובד.
-- **שעון חיצוני אמין** – זמני הנוכחות נלקחים משירות זמן חיצוני (TimeAPI.io, אזור Europe/Zurich) ולא משעון המקומי. אם השירות לא זמין הפעולה נכשלת ולא נרשמת (fail‑closed).
-- **טיפול במשמרות חסרות** – משמרת ללא Clock‑out מסומנת `PendingReview`, והעובד יכול להשלים אותה דרך בקשת תיקון.
-- **בקשות תיקון ואישורים** – עובד מגיש בקשת תיקון (פעולה חסרה / התאמת זמן); מנהל מאשר או דוחה.
-- **דוחות** – סיכום חודשי ודוח טווח תאריכים, ברמת עובד בודד או צוות שלם.
-- **הרשאות מבוססות תפקיד** – `Employee` ו‑`Manager`, עם אימות JWT.
-- **Audit log** – תיעוד פעולות רגישות (עריכות, אישורים/דחיות, יצירת/השבתת משתמשים).
+- **Attendance tracking** – Clock‑in / clock‑out and break start/end for every employee.
+- **Trusted external clock** – Attendance timestamps are taken from an external time service (TimeAPI.io, Europe/Zurich), not the local machine clock. If the service is unavailable the action fails and is not recorded (fail‑closed).
+- **Missed‑shift handling** – A shift with no clock‑out is flagged `PendingReview`, and the employee can complete it via a correction request.
+- **Correction requests & approvals** – Employees submit corrections (missing action / time adjustment); managers approve or reject them.
+- **Reports** – Monthly summaries and date‑range reports, per individual employee or for the whole team.
+- **Role‑based access** – `Employee` and `Manager` roles, secured with JWT authentication.
+- **Audit log** – Sensitive operations are recorded (edits, approvals/rejections, user creation/deactivation).
 
-## ארכיטקטורה
+## Architecture
 
 ```
 src/
-├── Attendance.Api             # שכבת ה-API: Controllers, JWT, טיפול שגיאות גלובלי
-├── Attendance.Application     # לוגיקה עסקית: Entities, Services, DTOs, Interfaces
-└── Attendance.Infrastructure  # מימושים: EF Core (SQL Server), אבטחה, ספק זמן חיצוני
+├── Attendance.Api             # API layer: controllers, JWT, global error handling
+├── Attendance.Application     # Business logic: entities, services, DTOs, interfaces
+└── Attendance.Infrastructure  # Implementations: EF Core (SQL Server), security, external time provider
 
 frontend/                      # React + TypeScript + Vite
-database/                      # סקריפטי SQL ליצירת המסד ולזריעת מנהל ראשוני
+database/                      # SQL scripts to create the database and seed the initial manager
 ```
 
-הפרדה לשכבות: `Application` מגדירה ממשקים (`IApplicationDbContext`, `IExternalTimeProvider` וכו'), ו‑`Infrastructure` מספקת את המימושים. ה‑API מחווט הכול ב‑Dependency Injection.
+Layers are kept separate: `Application` defines interfaces (`IApplicationDbContext`, `IExternalTimeProvider`, etc.) and `Infrastructure` provides the implementations. The API wires everything together through dependency injection.
 
-## טכנולוגיות
+## Tech Stack
 
-| תחום | טכנולוגיה |
+| Area | Technology |
 |------|-----------|
 | Backend | .NET 10, ASP.NET Core Web API |
 | ORM / DB | Entity Framework Core, SQL Server |
-| אבטחה | JWT Bearer, PBKDF2 password hashing |
+| Security | JWT Bearer, PBKDF2 password hashing |
 | Frontend | React 19, TypeScript, Vite, React Router, Axios |
 
-## דרישות מקדימות
+## Prerequisites
 
 - .NET SDK 10
-- SQL Server (מקומי או Express)
+- SQL Server (local or Express)
 - Node.js 20+
 
-## התקנה והרצה
+## Getting Started
 
-### 1. מסד הנתונים
+### 1. Database
 
-הריצו את הסקריפטים שתחת `database/` לפי הסדר:
+Run the scripts under `database/` in order:
 
 ```sql
-01_create_database.sql   -- יצירת המסד
-02_create_tables.sql     -- יצירת הטבלאות
-03_seed_manager.sql      -- זריעת מנהל ראשוני
+01_create_database.sql   -- create the database
+02_create_tables.sql     -- create the tables
+03_seed_manager.sql      -- seed the initial manager
 ```
 
-עדכנו את ‎`ConnectionStrings:AttendanceDb`‎ בקובץ `src/Attendance.Api/appsettings.json` בהתאם לסביבה.
+Update `ConnectionStrings:AttendanceDb` in `src/Attendance.Api/appsettings.json` for your environment.
 
 ### 2. Backend
 
@@ -62,15 +62,15 @@ cd src/Attendance.Api
 dotnet run
 ```
 
-בסביבת Development נטענת תיעוד OpenAPI ומופעל seeder שמחליף את סיסמת ה‑placeholder של המנהל בסיסמה אמיתית.
+In the Development environment, OpenAPI documentation is exposed and a seeder replaces the manager's placeholder password with a real hash.
 
-**משתמש ברירת מחדל (פיתוח בלבד):**
+**Default user (development only):**
 
 ```
 Email:    admin@attendance.local
 Password: Admin#12345
 ```
-> יש להחליף את הסיסמה לאחר ההתחברות הראשונה.
+> Change the password after the first login.
 
 ### 3. Frontend
 
@@ -80,22 +80,22 @@ npm install
 npm run dev
 ```
 
-## עיקרי ה-API
+## API Overview
 
-| Method | Endpoint | תיאור |
-|--------|----------|-------|
-| `POST` | `/api/auth/login` | התחברות, מחזיר JWT |
-| `POST` | `/api/attendance/clock-in` \| `/clock-out` | רישום כניסה/יציאה |
-| `POST` | `/api/attendance/break/start` \| `/break/end` | התחלת/סיום הפסקה |
-| `GET`  | `/api/attendance/me` | היסטוריית נוכחות אישית |
-| `POST` | `/api/attendance/{id}/resolve` | השלמת משמרת ב‑PendingReview |
-| `POST` | `/api/corrections` | הגשת בקשת תיקון |
-| `POST` | `/api/corrections/{id}/review` | אישור/דחייה (מנהל) |
-| `GET`  | `/api/reports/me/monthly` | סיכום חודשי אישי |
-| `GET`  | `/api/reports/team/range` | דוח טווח לצוות (מנהל) |
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/auth/login` | Log in, returns a JWT |
+| `POST` | `/api/attendance/clock-in` \| `/clock-out` | Clock in / out |
+| `POST` | `/api/attendance/break/start` \| `/break/end` | Start / end a break |
+| `GET`  | `/api/attendance/me` | Personal attendance history |
+| `POST` | `/api/attendance/{id}/resolve` | Complete a PendingReview shift |
+| `POST` | `/api/corrections` | Submit a correction request |
+| `POST` | `/api/corrections/{id}/review` | Approve / reject (manager) |
+| `GET`  | `/api/reports/me/monthly` | Personal monthly summary |
+| `GET`  | `/api/reports/team/range` | Team date‑range report (manager) |
 
-כל ה‑endpoints (מלבד `login`) דורשים JWT. נקודות קצה מסוימות מוגבלות לתפקיד `Manager`.
+All endpoints except `login` require a JWT. Some endpoints are restricted to the `Manager` role.
 
-## הערות אבטחה
+## Security Notes
 
-הערכים שב‑`appsettings.json` (מפתח JWT, סיסמת seed) מיועדים לפיתוח בלבד. בסביבת production יש להחליפם ולהזריקם דרך משתני סביבה או secrets store.
+The values in `appsettings.json` (JWT key, seed password) are for development only. In production, replace them and inject secrets through environment variables or a secrets store.
